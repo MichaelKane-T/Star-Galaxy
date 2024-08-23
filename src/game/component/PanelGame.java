@@ -177,6 +177,7 @@ public class PanelGame  extends JComponent {
          Bullet bullet = bullets.get(i);
          if (bullet != null){
              bullet.draw(g2);
+             System.out.println("Bullet drawn at position: (" + bullet.getX() + ", " + bullet.getY() + ")");
          }
      }
     }

@@ -9,7 +9,7 @@ public class Bullet {
     private double x;
     private double y;
     private final Shape shape;
-    private final Color color = new Color(255,255,24);
+    private final Color color = new Color(255,255,255);
     private final float angle;
     private final double size;
     private float speed = 1f;
@@ -28,12 +28,13 @@ public class Bullet {
     public void update(){
         x += Math.cos(Math.toRadians(angle))* speed;
         y += Math.sin(Math.toRadians(angle))* speed;
+        System.out.println("Bullet updated - New position: (" + x + ", " + y + ")");
     }
     public boolean check(int width, int height){
         if (x <= -size || y<-size || x > width || y > height){
-            return false;
-        }else {
             return true;
+        }else {
+            return false;
         }
     }
     public void draw(Graphics2D g2){
