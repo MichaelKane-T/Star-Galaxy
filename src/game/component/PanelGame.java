@@ -2,6 +2,7 @@ package game.component;
 
 import game.obj.Bullet;
 import game.obj.Player;
+import game.obj.Rocket;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class PanelGame  extends JComponent {
 
@@ -25,6 +27,7 @@ public class PanelGame  extends JComponent {
     //Game OBJ
     private Player player;
     private List<Bullet> bullets;
+    private List<Rocket> rockets;
     //Game FPS
     private final int FPS = 60;
     private final int TARGET_TIME = 1000000000 / FPS;
@@ -61,9 +64,33 @@ public class PanelGame  extends JComponent {
         thread.start();
     }
 
+    private void addRocket(){
+        Random ran = new Random();
+        int locationY = ran.nextInt(height-50)+25;
+        Rocket rocket = new Rocket();
+        rocket.changeLocation(0,locationY);
+        rocket.changeAngel(0);
+        rockets.add(rocket);
+        int locationY2 = ran.nextInt(height-50)+25;
+        Rocket rocket2 = new Rocket();
+        rocket2.changeLocation(width, locationY2);
+        rocket2.changeAngel(180);
+        rockets.add(rocket2);
+    }
+
     private void initObjectGame(){
         player =new Player();
         player.changeLocation(150,150);
+        rockets = new ArrayList<>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (start){
+                    addRocket();
+                    sleep(3000);
+                }
+            }
+        }).start();
     }
     private void initKeyboard(){
         key = new Key();
@@ -115,10 +142,10 @@ public class PanelGame  extends JComponent {
                     if (key.isKey_j()||key.isKey_k()){
                         if (shotTime == 0){
                             if(key.isKey_j()){
-                                System.out.println("Key J Pressed at position: " + player.getX() + ", " + player.getY());
+
                                 bullets.add(0,new Bullet(player.getX(), player.getY(), player.getAngle(), 5,3f));
                             }else{
-                                System.out.println("Key K Pressed at position: " + player.getX() + ", " + player.getY());
+
                                 bullets.add(0,new Bullet(player.getX(), player.getY(), player.getAngle(), 20,3f));
                             }
                         }
@@ -137,6 +164,12 @@ public class PanelGame  extends JComponent {
                     }
                     player.update();
                     player.changeAngel(angle);
+                    for (int i = 0; i<rockets.size();i++){
+                        Rocket rocket = rockets.get(i);
+                        if (rocket != null){
+                            rocket.update();
+                        }
+                    }
                     sleep(5);
                 }
             }
@@ -177,7 +210,12 @@ public class PanelGame  extends JComponent {
          Bullet bullet = bullets.get(i);
          if (bullet != null){
              bullet.draw(g2);
-             System.out.println("Bullet drawn at position: (" + bullet.getX() + ", " + bullet.getY() + ")");
+         }
+     }
+     for (int i = 0;i<rockets.size();i++){
+         Rocket rocket = rockets.get(i);
+         if (rocket != null){
+             rocket.draw(g2);
          }
      }
     }

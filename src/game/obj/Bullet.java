@@ -28,7 +28,6 @@ public class Bullet {
     public void update(){
         x += Math.cos(Math.toRadians(angle))* speed;
         y += Math.sin(Math.toRadians(angle))* speed;
-        System.out.println("Bullet updated - New position: (" + x + ", " + y + ")");
     }
     public boolean check(int width, int height){
         if (x <= -size || y<-size || x > width || y > height){
