@@ -15,17 +15,17 @@ public class Rocket {
     private final Image image;
     private final Area rocketShape;
 
-    public Rocket(){
+    public Rocket() {
         this.image = new ImageIcon(getClass().getResource("/game/image/rocket.png")).getImage();
-        Path2D path =  new Path2D.Double();
-        path.moveTo(0, ROCKET_SIZE/2);
-        path.lineTo(15,10);
-        path.lineTo(ROCKET_SIZE-5,13);
-        path.lineTo(ROCKET_SIZE+10,ROCKET_SIZE/2);
-        path.lineTo(ROCKET_SIZE-5,ROCKET_SIZE-13);
-        path.lineTo(15,ROCKET_SIZE-10);
-        rocketShape= new Area();
-
+        Path2D path = new Path2D.Double();
+        path.moveTo(0, ROCKET_SIZE / 2);
+        path.lineTo(15, 10);
+        path.lineTo(ROCKET_SIZE - 5, 13);
+        path.lineTo(ROCKET_SIZE + 10, ROCKET_SIZE / 2);
+        path.lineTo(ROCKET_SIZE - 5, ROCKET_SIZE - 13);
+        path.lineTo(15, ROCKET_SIZE - 10);
+        path.closePath();  // Close the path to complete the shape
+        rocketShape = new Area(path);  // Assign the path to the rocketShape
     }
 
     public void changeLocation(double x, double y){
@@ -53,8 +53,9 @@ public class Rocket {
         Shape shape = getRocketShape();
         g2.setTransform(oldTransform);
 
-        g2.setColor(Color.green);
-        g2.draw(shape);
+//        g2.setColor(Color.green);
+//        g2.draw(shape);
+//        g2.draw(shape.getBounds2D());
 
     }
     public double getX() {
@@ -74,5 +75,13 @@ public class Rocket {
         afx.translate(x,y);
         afx.rotate(Math.toRadians(angle), ROCKET_SIZE/2,ROCKET_SIZE/2);
         return new Area(afx.createTransformedShape(rocketShape));
+    }
+    public boolean check(int width, int height){
+        Rectangle size = getRocketShape().getBounds();
+        if (x<= -size.getWidth() || y < -size.getHeight() || x > width || y >height){
+            return false;
+        }else {
+            return true;
+        }
     }
 }

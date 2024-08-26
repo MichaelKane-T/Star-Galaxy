@@ -2,6 +2,7 @@ package game.obj;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 
 public class Bullet {
@@ -59,5 +60,9 @@ public class Bullet {
     }
     public double getCenterY(){
         return y + size /2;
+    }
+
+    public Shape getShape() {
+        return new Area(new Ellipse2D.Double(x,y,size,size));
     }
 }

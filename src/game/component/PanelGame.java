@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,6 +169,10 @@ public class PanelGame  extends JComponent {
                         Rocket rocket = rockets.get(i);
                         if (rocket != null){
                             rocket.update();
+                            if (!rocket.check(width,height)){
+                                rockets.remove(rocket);
+                                System.out.println("Removed...");
+                            }
                         }
                     }
                     sleep(5);
@@ -186,6 +191,7 @@ public class PanelGame  extends JComponent {
                         Bullet bullet =bullets.get(i);
                         if (bullet != null){
                             bullet.update();
+                            checkBullets(bullet);
                             if (bullet.check(width, height)){
                                 bullets.remove(bullet);
                             }
@@ -197,6 +203,20 @@ public class PanelGame  extends JComponent {
                 }
             }
         }).start();
+    }
+    public void checkBullets(Bullet bullet){
+        for (int i =0; i < rockets.size(); i++){
+            Rocket rocket =rockets.get(i);
+            if (rocket!=null){
+                Area area =new Area(bullet.getShape());
+                area.intersect(rocket.getRocketShape());
+                if (!area.isEmpty()){
+                    System.out.println("Boom");
+                    rockets.remove(rocket);
+                    bullets.remove(bullet);
+                }
+            }
+        }
     }
 
     private void drawBackground(){
