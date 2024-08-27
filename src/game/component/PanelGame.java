@@ -1,6 +1,7 @@
 package game.component;
 
 import game.obj.Bullet;
+import game.obj.Effect;
 import game.obj.Player;
 import game.obj.Rocket;
 
@@ -29,6 +30,7 @@ public class PanelGame  extends JComponent {
     private Player player;
     private List<Bullet> bullets;
     private List<Rocket> rockets;
+    private List<Effect> boomEffects;
     //Game FPS
     private final int FPS = 60;
     private final int TARGET_TIME = 1000000000 / FPS;
@@ -83,6 +85,7 @@ public class PanelGame  extends JComponent {
         player =new Player();
         player.changeLocation(150,150);
         rockets = new ArrayList<>();
+        boomEffects = new ArrayList<>();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -199,6 +202,17 @@ public class PanelGame  extends JComponent {
                             bullets.remove(bullet);
                         }
                     }
+                    for (int i = 0; i <boomEffects.size();i++){
+                        Effect boomEffect = boomEffects.get(i);
+                        if (boomEffect != null){
+                            boomEffect.update();
+                            if (!boomEffect.check()){
+                                boomEffects.remove(boomEffect);
+                            }
+                        }else {
+                            boomEffects.remove(boomEffect);
+                        }
+                    }
                     sleep(1);
                 }
             }
@@ -212,8 +226,21 @@ public class PanelGame  extends JComponent {
                 area.intersect(rocket.getRocketShape());
                 if (!area.isEmpty()){
                     System.out.println("Boom");
-                    rockets.remove(rocket);
+                    boomEffects.add(new Effect(bullet.getCenterX(),bullet.getCenterY(),50,50,60,0.3f,new Color(230,207,105)));
+                    if (true){
+                        rockets.remove(rocket);
+                        double x =rocket.getX()+Rocket.ROCKET_SIZE/2;
+                        double y =rocket.getY()+Rocket.ROCKET_SIZE/2;
+                        //boomEffects.add(new Effect(x,y,50,40,75,0.05f,new Color(186, 79, 52)));
+                        //boomEffects.add(new Effect(x,y,75,35,105,0.04f,new Color(243, 100, 57)));
+                        boomEffects.add(new Effect(x,y,45,55,15,0.35f,new Color(228, 204, 77)));
+                        boomEffects.add(new Effect(x,y,65,15,11,0.05f,new Color(236, 76, 41)));
+                        boomEffects.add(new Effect(x,y,35,10,11,0.04f,new Color(83, 82, 82)));
+                        boomEffects.add(new Effect(x,y,85,5,11,0.07f,new Color(255, 255, 255)));
+                        boomEffects.add(new Effect(x,y,15,8,60,0.05f,new Color(246, 153, 87)));
+                    }
                     bullets.remove(bullet);
+                    break;
                 }
             }
         }
@@ -236,6 +263,12 @@ public class PanelGame  extends JComponent {
          Rocket rocket = rockets.get(i);
          if (rocket != null){
              rocket.draw(g2);
+         }
+     }
+     for (int i = 0; i <boomEffects.size();i++){
+         Effect boomEffect = boomEffects.get(i);
+         if (boomEffect != null){
+             boomEffect.draw(g2);
          }
      }
     }
