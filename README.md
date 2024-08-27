@@ -1,5 +1,5 @@
 # Star-Galaxy
-##Welcome to the Game Project! This is an exciting and interactive game application built using Java, featuring various components like rockets, bullets, and player controls. This README will guide you through the setup, usage, and contribution processes.
+#Welcome to the Game Project! This is an exciting and interactive game application built using Java, featuring various components like rockets, bullets, and player controls. This README will guide you through the setup, usage, and contribution processes.
 
 Table of Contents
 Project Description
