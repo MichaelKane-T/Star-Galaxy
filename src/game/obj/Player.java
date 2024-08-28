@@ -3,12 +3,14 @@ package game.obj;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
 
 /**
  * The Player class represents the player's character in the game.
  * It handles the player's position, movement, and rendering.
  */
-public class Player {
+public class Player extends HpRender{
 
     // Constants
     public static final double PLAYER_SIZE = 64; // Size of the player (width/height)
@@ -19,19 +21,31 @@ public class Player {
     private double y; // y-coordinate of the player
     private float speed = 0f; // Current speed of the player
     private boolean speedUp; // Whether the player is speeding up
+    private boolean alive = true; //Whether the player is alive or not
     private float angle = 0f; // Current angle of the player
 
     // Images for the player
     private final Image image; // Default image of the player
     private final Image image_speed; // Image of the player when speeding up
+    private final Area  playerShape;
 
     /**
      * Constructor to initialize the Player object and load images.
      */
     public Player() {
+
         // Load the player's default and speed-up images from the resources
+        super(new HP(30,40));
         this.image = new ImageIcon(getClass().getResource("/game/image/plane.png")).getImage();
         image_speed = new ImageIcon(getClass().getResource("/game/image/plane_speed.png")).getImage();
+        Path2D p = new Path2D.Double();
+        p.moveTo(0,15);
+        p.lineTo(20,5);
+        p.lineTo(PLAYER_SIZE +15,PLAYER_SIZE/2);
+        p.lineTo(20,PLAYER_SIZE -5);
+        p.lineTo(0,PLAYER_SIZE-15);
+        p.closePath();
+        playerShape =new Area(p);
     }
 
     /**
@@ -86,9 +100,14 @@ public class Player {
 
         // Draw the player image (use the speed-up image if the player is speeding up)
         g2.drawImage(speedUp ? image_speed : image, tran, null);
-
+        hpRender(g2,getShape(),y);
         // Restore the original transformation
         g2.setTransform(oldTransform);
+
+        //Test
+//        g2.setColor(new Color(12,173,84));
+//        g2.draw(getShape());
+//        g2.draw(getShape().getBounds());
     }
 
     /**
@@ -130,6 +149,13 @@ public class Player {
             speed += 0.01f; // Gradually increase the speed
         }
     }
+    public Area getShape() {
+        AffineTransform afx = new AffineTransform();
+        afx.translate(x, y);
+        afx.rotate(Math.toRadians(angle), PLAYER_SIZE / 2, PLAYER_SIZE / 2);
+        return new Area(afx.createTransformedShape(playerShape));
+    }
+
 
     /**
      * Decreases the player's speed, simulating a speed-down.
@@ -142,5 +168,26 @@ public class Player {
         } else {
             speed -= 0.003f; // Gradually decrease the speed
         }
+    }
+    /**
+     * Gets the current Status (dead/alive) of the player.
+     *
+     * @return The Status of the player in boolean.
+     */
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
+
+
+    public void reset() {
+        alive = true;
+        resetHP();
+        angle = 0;
+        speed = 0;
+
     }
 }

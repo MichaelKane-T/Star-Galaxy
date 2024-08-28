@@ -12,6 +12,7 @@ public class Key {
     private boolean key_j;     // State of the 'J' key
     private boolean key_k;     // State of the 'K' key
     private boolean key_space; // State of the spacebar key
+    private boolean key_enter; // State of the enter key
 
     /**
      * Checks if the right arrow key is pressed.
@@ -29,6 +30,24 @@ public class Key {
      */
     public void setKey_right(boolean key_right) {
         this.key_right = key_right;
+    }
+
+    /**
+     * Checks if the enter key is pressed.
+     *
+     * @return true if the enter key is pressed, false otherwise.
+     */
+    public boolean isKey_enter() {
+        return key_enter;
+    }
+
+    /**
+     * Sets the state of the enter  key.
+     *
+     * @param key_enter true if the right arrow key is pressed, false otherwise.
+     */
+    public void setKey_enter(boolean key_enter) {
+        this.key_enter = key_enter;
     }
 
     /**

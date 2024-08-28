@@ -4,12 +4,14 @@ import game.obj.Bullet;
 import game.obj.Effect;
 import game.obj.Player;
 import game.obj.Rocket;
+import game.obj.sound.Sound;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,8 @@ public class PanelGame extends JComponent {
     private boolean start = true; // Flag to control the game loop
     private Key key; // Object to manage keyboard input
     private int shotTime; // Counter to manage shooting rate
+    private int score = 0;
+    private Sound sound;
 
     // Game Objects
     private Player player;
@@ -105,8 +109,9 @@ public class PanelGame extends JComponent {
      * Initializes the game objects (player, rockets, effects).
      */
     private void initObjectGame() {
+        sound = new Sound();
         player = new Player();
-        player.changeLocation(150, 150);
+        player.changeLocation(650, 350);
         rockets = new ArrayList<>();
         boomEffects = new ArrayList<>();
 
@@ -132,32 +137,36 @@ public class PanelGame extends JComponent {
             @Override
             public void keyPressed(KeyEvent e) {
                 // Handle key presses for movement and shooting
-                if (e.getKeyCode() == KeyEvent.VK_A) {
+                if (e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() == KeyEvent.VK_LEFT) {
                     key.setKey_left(true);
-                } else if (e.getKeyCode() == KeyEvent.VK_D) {
+                } else if (e.getKeyCode() == KeyEvent.VK_D || e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     key.setKey_right(true);
-                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                } else if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP ) {
                     key.setKey_space(true);
-                } else if (e.getKeyCode() == KeyEvent.VK_J) {
+                } else if (e.getKeyCode() == KeyEvent.VK_J || e.getKeyCode() == KeyEvent.VK_CONTROL) {
                     key.setKey_j(true);
-                } else if (e.getKeyCode() == KeyEvent.VK_K) {
+                } else if (e.getKeyCode() == KeyEvent.VK_K || e.getKeyCode() == KeyEvent.VK_ALT) {
                     key.setKey_k(true);
+                }else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    key.setKey_enter(true);
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 // Handle key releases to stop movement or shooting
-                if (e.getKeyCode() == KeyEvent.VK_A) {
+                if (e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() == KeyEvent.VK_LEFT) {
                     key.setKey_left(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_D) {
+                } else if (e.getKeyCode() == KeyEvent.VK_D || e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     key.setKey_right(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                } else if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_UP ) {
                     key.setKey_space(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_J) {
+                } else if (e.getKeyCode() == KeyEvent.VK_J || e.getKeyCode() == KeyEvent.VK_CONTROL) {
                     key.setKey_j(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_K) {
+                } else if (e.getKeyCode() == KeyEvent.VK_K || e.getKeyCode() == KeyEvent.VK_ALT) {
                     key.setKey_k(false);
+                }else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    key.setKey_enter(false);
                 }
             }
         });
@@ -168,41 +177,52 @@ public class PanelGame extends JComponent {
             public void run() {
                 float s = 0.5f; // Speed of player rotation
                 while (start) {
-                    float angle = player.getAngle();
-                    if (key.isKey_left()) {
-                        angle -= s;
-                    }
-                    if (key.isKey_right()) {
-                        angle += s;
-                    }
-                    if (key.isKey_j() || key.isKey_k()) {
-                        if (shotTime == 0) {
-                            if (key.isKey_j()) {
-                                bullets.add(0, new Bullet(player.getX(), player.getY(), player.getAngle(), 5, 3f));
-                            } else {
-                                bullets.add(0, new Bullet(player.getX(), player.getY(), player.getAngle(), 20, 3f));
-                            }
+                    if (player.isAlive()){
+                        float angle = player.getAngle();
+                        if (key.isKey_left()) {
+                            angle -= s;
                         }
-                        shotTime++;
-                        if (shotTime == 15) {
+                        if (key.isKey_right()) {
+                            angle += s;
+                        }
+                        if (key.isKey_j() || key.isKey_k()) {
+                            if (shotTime == 0) {
+                                if (key.isKey_j()) {
+                                    bullets.add(0, new Bullet(player.getX(), player.getY(), player.getAngle(), 5, 3f));
+                                } else {
+                                    bullets.add(0, new Bullet(player.getX(), player.getY(), player.getAngle(), 20, 3f));
+                                }
+                                sound.soundShoot();
+                            }
+                            shotTime++;
+                            if (shotTime == 15) {
+                                shotTime = 0;
+                            }
+                        } else {
                             shotTime = 0;
                         }
-                    } else {
-                        shotTime = 0;
+                        if (key.isKey_space()) {
+                            player.speedUp();
+                        } else {
+                            player.speedDown();
+                        }
+                        player.update();
+                        player.changeAngel(angle);
+                    }else {
+                        if(key.isKey_enter()){
+                            resetGame();
+                        }
                     }
-                    if (key.isKey_space()) {
-                        player.speedUp();
-                    } else {
-                        player.speedDown();
-                    }
-                    player.update();
-                    player.changeAngel(angle);
                     for (int i = 0; i < rockets.size(); i++) {
                         Rocket rocket = rockets.get(i);
                         if (rocket != null) {
                             rocket.update();
                             if (!rocket.check(width, height)) {
                                 rockets.remove(rocket); // Remove rocket if out of bounds
+                            }else {
+                                if (player.isAlive()){
+                                    checkPlayer(rocket);
+                                }
                             }
                         }
                     }
@@ -210,6 +230,15 @@ public class PanelGame extends JComponent {
                 }
             }
         }).start();
+    }
+
+    private void resetGame() {
+        rockets.clear();
+        bullets.clear();
+        player.changeLocation(650, 350);
+        player.reset();
+        sound.resetGameOverFlag();
+        score = 0;
     }
 
     /**
@@ -268,13 +297,13 @@ public class PanelGame extends JComponent {
 
                 // If the bullet and rocket intersect, create explosion effects and remove the rocket
                 if (!area.isEmpty()) {
-                    System.out.println("Boom"); // Debugging output
 
-                    // Add the initial explosion effect at the bullet's location
-                    boomEffects.add(new Effect(bullet.getCenterX(), bullet.getCenterY(), 50, 50, 60, 0.3f, new Color(230, 207, 105)));
-
-                    if (true) { // The condition is always true; this if statement seems redundant
+                    if (!rocket.updateHP(bullet.getSize())) { // The condition is always true; this if statement seems redundant
+                        score++;
                         rockets.remove(rocket); // Remove the rocket from the list
+                        sound.soundDestroy();
+                        // Add the initial explosion effect at the bullet's location
+                        boomEffects.add(new Effect(bullet.getCenterX(), bullet.getCenterY(), 50, 50, 60, 0.3f, new Color(230, 207, 105)));
 
                         // Calculate the center of the rocket for placing explosion effects
                         double x = rocket.getX() + Rocket.ROCKET_SIZE / 2;
@@ -286,12 +315,65 @@ public class PanelGame extends JComponent {
                         boomEffects.add(new Effect(x, y, 35, 10, 11, 0.04f, new Color(83, 82, 82)));
                         boomEffects.add(new Effect(x, y, 85, 5, 11, 0.07f, new Color(255, 255, 255)));
                         boomEffects.add(new Effect(x, y, 15, 8, 60, 0.05f, new Color(246, 153, 87)));
+                    }else{
+                        sound.soundHit();
                     }
                     bullets.remove(bullet); // Remove the bullet after the collision
                     break; // Exit the loop after processing the collision
                 }
             }
         }
+    }
+
+    /**
+     * Checks for collisions between bullets and rockets.
+     *
+     * @param rocket The rocket to check for collisions.
+     */
+    public void checkPlayer(Rocket rocket) {
+            if (rocket != null) {
+                // Create an Area object from the Player's shape and check for intersection with the rocket's shape
+                Area area = new Area(player.getShape());
+                area.intersect(rocket.getRocketShape());
+                // If the bullet and rocket intersect, create explosion effects and remove the rocket
+                if (!area.isEmpty()) {
+                    double rocketHp = rocket.getHp();
+                    if (!rocket.updateHP(player.getHp())) { // The condition is always true; this if statement seems redundant
+                        rockets.remove(rocket); // Remove the rocket from the list
+                        sound.soundDestroy();
+                        // Add the initial explosion effect at the bullet's location
+                        boomEffects.add(new Effect(rocket.getX(), rocket.getY(), 50, 50, 60, 0.3f, new Color(230, 207, 105)));
+                        // Calculate the center of the rocket for placing explosion effects
+                        double x = rocket.getX() + Rocket.ROCKET_SIZE / 2;
+                        double y = rocket.getY() + Rocket.ROCKET_SIZE / 2;
+
+                        // Add multiple explosion effects at the rocket's location with different parameters
+                        boomEffects.add(new Effect(x, y, 45, 55, 15, 0.35f, new Color(228, 204, 77)));
+                        boomEffects.add(new Effect(x, y, 65, 15, 11, 0.05f, new Color(236, 76, 41)));
+                        boomEffects.add(new Effect(x, y, 35, 10, 11, 0.04f, new Color(83, 82, 82)));
+                        boomEffects.add(new Effect(x, y, 85, 5, 11, 0.07f, new Color(255, 255, 255)));
+                        boomEffects.add(new Effect(x, y, 15, 8, 60, 0.05f, new Color(246, 153, 87)));
+                    }
+                    if (!player.updateHP(rocketHp)) { // The condition is always true; this if statement seems redundant
+                        player.setAlive(false);
+                        sound.soundDestroy();
+                        // Add the initial explosion effect at the bullet's location
+                        boomEffects.add(new Effect(player.getX(), player.getY(), 50, 50, 60, 0.3f, new Color(230, 207, 105)));
+                        // Calculate the center of the rocket for placing explosion effects
+                        double x = player.getX() + Player.PLAYER_SIZE / 2;
+                        double y = player.getY() + Player.PLAYER_SIZE  / 2;
+
+                        // Add multiple explosion effects at the rocket's location with different parameters
+                        boomEffects.add(new Effect(x, y, 45, 55, 15, 0.35f, new Color(228, 204, 77)));
+                        boomEffects.add(new Effect(x, y, 65, 15, 11, 0.05f, new Color(236, 76, 41)));
+                        boomEffects.add(new Effect(x, y, 35, 10, 11, 0.04f, new Color(83, 82, 82)));
+                        boomEffects.add(new Effect(x, y, 85, 5, 11, 0.07f, new Color(255, 255, 255)));
+                        boomEffects.add(new Effect(x, y, 15, 8, 60, 0.05f, new Color(246, 153, 87)));
+                    }
+                }
+
+            }
+
     }
 
     private void drawBackground() {
@@ -302,8 +384,9 @@ public class PanelGame extends JComponent {
 
     private void drawGame() {
         // Draw the player character
-        player.draw(g2);
-
+        if (player.isAlive()){
+            player.draw(g2);
+        }
         // Draw all bullets
         for (int i = 0; i < bullets.size(); i++) {
             Bullet bullet = bullets.get(i);
@@ -327,6 +410,59 @@ public class PanelGame extends JComponent {
                 boomEffect.draw(g2);
             }
         }
+        g2.setColor(Color.WHITE);
+        g2.setFont(getFont().deriveFont(Font.BOLD, 15f));
+        g2.drawString("Score: " + score, 10, 20);
+
+        if (!player.isAlive()) {
+            String text = "GAME OVER";
+            String textKey = "Press Key enter to Continue";
+            String scoreText = "SCORE: " + score;
+
+            // Set font for "GAME OVER"
+            g2.setFont(getFont().deriveFont(Font.BOLD, 50f));
+            FontMetrics fm = g2.getFontMetrics();
+
+            // Calculate the dimensions of "GAME OVER"
+            Rectangle2D r2 = fm.getStringBounds(text, g2);
+            double textWidth = r2.getWidth();
+            double textHeight = r2.getHeight();
+            double x = (width - textWidth) / 2;
+            double y = (height - textHeight) / 2;
+
+            // Draw "GAME OVER"
+            g2.drawString(text, (int) x, (int) (y + fm.getAscent()));
+
+            // Set font for score text
+            g2.setFont(getFont().deriveFont(Font.BOLD, 25f));
+            fm = g2.getFontMetrics(); // Update FontMetrics for the new font size
+
+            // Calculate the width of the score text for proper centering
+            r2 = fm.getStringBounds(scoreText, g2);
+            double scoreTextWidth = r2.getWidth();
+
+            // Calculate the position for scoreText centered beneath "GAME OVER"
+            double scoreTextY = y + textHeight + 20; // Add some spacing between "GAME OVER" and score
+            double scoreTextX = (width - scoreTextWidth) / 2;
+            g2.drawString(scoreText, (int) scoreTextX, (int) (scoreTextY + fm.getAscent()));
+
+            // Set font for key instructions
+            g2.setFont(getFont().deriveFont(Font.BOLD, 15f));
+            fm = g2.getFontMetrics(); // Update FontMetrics for the new font size
+            r2 = fm.getStringBounds(textKey, g2);
+            double textKeyWidth = r2.getWidth();
+            textHeight = r2.getHeight();
+
+            // Calculate the position for the key instruction text centered beneath scoreText
+            double keyInstructionY = scoreTextY + textHeight + 30; // Add some spacing below the score
+            double keyInstructionX = (width - textKeyWidth) / 2;
+            g2.drawString(textKey, (int) keyInstructionX, (int) (keyInstructionY + fm.getAscent()));
+
+           sound.soundGameOver();
+
+        }
+
+
     }
 
     private void render() {

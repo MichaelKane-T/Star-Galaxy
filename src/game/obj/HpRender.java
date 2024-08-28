@@ -31,9 +31,9 @@ public class HpRender {
      * @param y The vertical offset for positioning the HP bar.
      */
     protected void hpRender(Graphics2D g2, Shape shape, double y) {
+        if (hp.getCurrentHP()!=hp.getMAX_HP()){
         // Calculate the Y position for the HP bar based on the entity's shape
         double hpY = shape.getBounds().getY() - y - 10;
-
         // Draw the background of the HP bar (grey color)
         g2.setColor(new Color(70, 70, 70));
         g2.fill(new Rectangle2D.Double(0, hpY, Player.PLAYER_SIZE, 2));
@@ -42,6 +42,7 @@ public class HpRender {
         g2.setColor(new Color(253, 91, 91));
         double hpSize = hp.getCurrentHP() / hp.getMAX_HP() * Player.PLAYER_SIZE;
         g2.fill(new Rectangle2D.Double(0, hpY, hpSize, 2));
+        }
     }
 
     /**
